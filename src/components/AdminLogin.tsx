@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Shield, User, Lock } from 'lucide-react';
+import { Shield, User, Lock, ArrowRight } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -19,6 +19,15 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onLogin(username, password);
+  };
+
+  const handleAutoLogin = () => {
+    setUsername('admin');
+    setPassword('1234');
+    // Use a small timeout to ensure state is updated before submitting
+    setTimeout(() => {
+      onLogin('admin', '1234');
+    }, 100);
   };
 
   return (
@@ -72,6 +81,14 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
                   />
                 </div>
               </div>
+              <Button 
+                type="button" 
+                className="w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white" 
+                onClick={handleAutoLogin}
+              >
+                <ArrowRight className="h-4 w-4" />
+                Schnell-Login (admin/1234)
+              </Button>
             </CardContent>
             <CardFooter>
               <Button type="submit" className="w-full">

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
@@ -14,9 +13,8 @@ import Footer from '@/components/Footer';
 import { Shield, Bell, Settings, LogOut } from 'lucide-react';
 import AdminLogin from '@/components/AdminLogin';
 
-// Simple in-memory admin authentication (In a real app, use a proper auth system)
 const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "rl-innviertel-2023";
+const ADMIN_PASSWORD = "1234";
 
 interface Announcement {
   id: number;
@@ -34,20 +32,17 @@ const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Check if admin is logged in on component mount
   useEffect(() => {
     const adminToken = localStorage.getItem('adminToken');
     if (adminToken === 'rl-innviertel-admin-token') {
       setIsLoggedIn(true);
     }
     
-    // Load maintenance mode from localStorage
     const savedMaintenanceMode = localStorage.getItem('maintenanceMode');
     if (savedMaintenanceMode) {
       setMaintenanceMode(JSON.parse(savedMaintenanceMode));
     }
     
-    // Load announcements from localStorage
     const savedAnnouncements = localStorage.getItem('announcements');
     if (savedAnnouncements) {
       setAnnouncements(JSON.parse(savedAnnouncements));
@@ -56,12 +51,10 @@ const Admin = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Save maintenance mode changes
   useEffect(() => {
     localStorage.setItem('maintenanceMode', JSON.stringify(maintenanceMode));
   }, [maintenanceMode]);
 
-  // Save announcements changes
   useEffect(() => {
     localStorage.setItem('announcements', JSON.stringify(announcements));
   }, [announcements]);
@@ -176,7 +169,6 @@ const Admin = () => {
             </TabsTrigger>
           </TabsList>
           
-          {/* Announcements Tab */}
           <TabsContent value="announcements">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card className="md:col-span-2">
@@ -266,7 +258,6 @@ const Admin = () => {
             </div>
           </TabsContent>
           
-          {/* Settings Tab */}
           <TabsContent value="settings">
             <Card>
               <CardHeader>
