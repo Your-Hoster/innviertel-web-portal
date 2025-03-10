@@ -76,7 +76,7 @@ const JoinSection = () => {
                 variant="outline"
                 className="border-white/60 text-white hover:bg-white/10 button-transition"
               >
-                <a href="https://discord.gg/example" target="_blank" rel="noopener noreferrer">
+                <a href="https://discord.gg/spvdkNdqx9" target="_blank" rel="noopener noreferrer">
                   Discord beitreten
                 </a>
               </Button>
