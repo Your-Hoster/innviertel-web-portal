@@ -57,11 +57,11 @@ const ServerInfo = () => {
         <div className="mt-16 glass-panel rounded-xl p-6 max-w-4xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
             <div>
-              <h3 className="text-4xl font-bold text-innviertel-accent mb-2">100+</h3>
+              <h3 className="text-4xl font-bold text-innviertel-accent mb-2">20+</h3>
               <p className="text-gray-600">Spielerslots</p>
             </div>
             <div>
-              <h3 className="text-4xl font-bold text-innviertel-accent mb-2">50+</h3>
+              <h3 className="text-4xl font-bold text-innviertel-accent mb-2">10+</h3>
               <p className="text-gray-600">Einzigartige Jobs</p>
             </div>
             <div>
