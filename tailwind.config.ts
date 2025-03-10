@@ -100,6 +100,10 @@ export default {
 				'float': {
 					'0%, 100%': { transform: 'translateY(0)' },
 					'50%': { transform: 'translateY(-10px)' }
+				},
+				'spin-slow': {
+					from: { transform: 'rotate(0deg)' },
+					to: { transform: 'rotate(360deg)' }
 				}
 			},
 			animation: {
@@ -108,7 +112,8 @@ export default {
 				'fade-in': 'fade-in 0.6s ease-out',
 				'fade-up': 'fade-up 0.8s ease-out',
 				'pulse-slow': 'pulse-slow 3s infinite',
-				'float': 'float 6s ease-in-out infinite'
+				'float': 'float 6s ease-in-out infinite',
+				'spin-slow': 'spin-slow 3s linear infinite'
 			},
 			backgroundImage: {
 				'hero-pattern': "linear-gradient(to bottom, rgba(15, 26, 46, 0.8), rgba(15, 26, 46, 0.9)), url('/hero-bg.jpg')",

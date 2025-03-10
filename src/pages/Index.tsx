@@ -8,6 +8,7 @@ import ServerInfo from '@/components/ServerInfo';
 import JoinSection from '@/components/JoinSection';
 import RulesSection from '@/components/RulesSection';
 import CommunitySection from '@/components/CommunitySection';
+import Announcements from '@/components/Announcements';
 
 const Index = () => {
   useEffect(() => {
@@ -49,6 +50,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+      
+      {/* Announcements */}
+      <Announcements />
       
       {/* Main Content Sections */}
       <main>
