@@ -22,13 +22,13 @@ const Footer = () => {
               und einer lebendigen Community.
             </p>
             <div className="flex space-x-4">
-              <a href="https://discord.gg/example" className="text-gray-300 hover:text-white transition-colors">
+              <a href="https://discord.gg/spvdkNdqx9" className="text-gray-300 hover:text-white transition-colors">
                 Discord
               </a>
-              <a href="https://instagram.com/example" className="text-gray-300 hover:text-white transition-colors">
+              <a href="https://www.instagram.com/your_hoster_de/" className="text-gray-300 hover:text-white transition-colors">
                 Instagram
               </a>
-              <a href="https://tiktok.com/@example" className="text-gray-300 hover:text-white transition-colors">
+              <a href="https://www.tiktok.com/@pascal07_2025" className="text-gray-300 hover:text-white transition-colors">
                 TikTok
               </a>
             </div>
