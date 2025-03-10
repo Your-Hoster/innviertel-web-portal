@@ -36,7 +36,7 @@ const Index = () => {
                 size="lg"
                 className="bg-innviertel-accent hover:bg-innviertel-accent/90 text-white button-transition"
               >
-                <a href="fivem://connect/connect.rl-innviertel.at">Jetzt spielen</a>
+                <a href="https://connect.yourhoster.at/">Jetzt spielen</a>
               </Button>
               <Button 
                 asChild
