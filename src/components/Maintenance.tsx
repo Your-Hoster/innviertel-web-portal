@@ -18,7 +18,7 @@ const Maintenance = () => {
         variant="outline" 
         className="bg-transparent text-white border-white hover:bg-white/10"
       >
-        <a href="https://discord.gg/innviertel" target="_blank" rel="noopener noreferrer">
+        <a href="https://discord.gg/spvdkNdqx9" target="_blank" rel="noopener noreferrer">
           Discord beitreten
         </a>
       </Button>
