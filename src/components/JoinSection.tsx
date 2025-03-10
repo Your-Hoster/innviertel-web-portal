@@ -68,7 +68,7 @@ const JoinSection = () => {
                 size="lg"
                 className="bg-white text-innviertel-primary hover:bg-white/90 button-transition"
               >
-                <a href="fivem://connect/connect.rl-innviertel.at">Jetzt spielen</a>
+                <a href="https://connect.yourhoster.at">Jetzt spielen</a>
               </Button>
               <Button 
                 asChild
