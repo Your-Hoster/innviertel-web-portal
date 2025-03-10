@@ -65,7 +65,7 @@ const Header = () => {
               asChild
               className="bg-innviertel-accent hover:bg-innviertel-accent/90 text-white"
             >
-              <a href="fivem://connect/connect.rl-innviertel.at">Jetzt spielen</a>
+              <a href="https://connect.yourhoster.at">Jetzt spielen</a>
             </Button>
           </nav>
           
