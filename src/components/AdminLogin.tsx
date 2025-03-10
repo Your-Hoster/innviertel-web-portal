@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,16 @@ interface AdminLoginProps {
 const AdminLogin = ({ onLogin }: AdminLoginProps) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+
+  useEffect(() => {
+    // Check if auto login is triggered from footer
+    const autoLogin = localStorage.getItem('adminAutoLogin');
+    if (autoLogin === 'true') {
+      // Clear the flag so it doesn't trigger again on refresh
+      localStorage.removeItem('adminAutoLogin');
+      handleAutoLogin();
+    }
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
