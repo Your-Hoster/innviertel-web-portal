@@ -1,6 +1,5 @@
-
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Footer = () => {
@@ -101,10 +100,10 @@ const Footer = () => {
           <Button 
             onClick={handleAdminLogin} 
             variant="ghost" 
-            className="mt-4 text-gray-400 hover:text-white text-xs flex items-center mx-auto"
+            className="mt-4 text-gray-400 hover:text-white text-sm flex items-center mx-auto"
           >
-            <ArrowRight className="h-3 w-3 mr-1" />
-            Admin-Login (admin/1234)
+            <Shield className="h-4 w-4 mr-1" />
+            Administrationszugang
           </Button>
         </div>
       </div>
