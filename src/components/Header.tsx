@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Shield } from 'lucide-react';
+import { Menu, X, Shield, LogIn } from 'lucide-react';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -42,7 +42,7 @@ const Header = () => {
           <Link to="/" className="text-white font-bold text-xl">REAL LIFE INNVIERTEL</Link>
           
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
+          <nav className="hidden md:flex items-center space-x-4">
             {navLinks.map((link) => (
               <Link 
                 key={link.name}
@@ -61,6 +61,13 @@ const Header = () => {
                 Admin
               </Link>
             )}
+            <Button 
+              variant="outline"
+              className="text-white border-white hover:bg-white hover:text-innviertel-primary mr-2"
+            >
+              <LogIn className="mr-2 h-4 w-4" />
+              Login
+            </Button>
             <Button 
               asChild
               variant="accent"
@@ -105,6 +112,14 @@ const Header = () => {
                   Admin
                 </Link>
               )}
+              <Button 
+                variant="outline"
+                className="text-white border-white hover:bg-white hover:text-innviertel-primary w-full"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <LogIn className="mr-2 h-4 w-4" />
+                Login
+              </Button>
               <Button 
                 asChild
                 variant="accent"
