@@ -70,6 +70,7 @@ const Header = () => {
             <Button 
               variant="outline"
               className="text-white border-white hover:bg-white hover:text-innviertel-primary mr-2"
+              onClick={handleLoginClick}
             >
               <LogIn className="mr-2 h-4 w-4" />
               Login
@@ -121,7 +122,7 @@ const Header = () => {
               <Button 
                 variant="outline"
                 className="text-white border-white hover:bg-white hover:text-innviertel-primary w-full"
-                onClick={() => setIsMenuOpen(false)}
+                onClick={handleLoginClick}
               >
                 <LogIn className="mr-2 h-4 w-4" />
                 Login
