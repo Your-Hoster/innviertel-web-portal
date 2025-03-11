@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
@@ -13,8 +14,8 @@ import Footer from '@/components/Footer';
 import { Shield, Bell, Settings, LogOut } from 'lucide-react';
 import AdminLogin from '@/components/AdminLogin';
 
-const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "1234";
+// Discord ID of the only allowed admin
+const ALLOWED_DISCORD_ID = "1108408817626124439";
 
 interface Announcement {
   id: number;
@@ -29,13 +30,27 @@ const Admin = () => {
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [newAnnouncement, setNewAnnouncement] = useState({ title: '', content: '' });
+  const [discordUserId, setDiscordUserId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
+    // Check for admin token and Discord user ID
     const adminToken = localStorage.getItem('adminToken');
-    if (adminToken === 'rl-innviertel-admin-token') {
+    const storedDiscordUserId = localStorage.getItem('discordUserId');
+    
+    // Only allow access if the user has the specific Discord ID
+    if (adminToken === 'rl-innviertel-admin-token' && storedDiscordUserId === ALLOWED_DISCORD_ID) {
       setIsLoggedIn(true);
+      setDiscordUserId(storedDiscordUserId);
+    } else {
+      // If not authorized, redirect to homepage
+      navigate('/');
+      toast({
+        title: "Zugriff verweigert",
+        description: "Sie haben keine Berechtigung für den Admin-Bereich",
+        variant: "destructive",
+      });
     }
     
     const savedMaintenanceMode = localStorage.getItem('maintenanceMode');
@@ -49,7 +64,7 @@ const Admin = () => {
     }
 
     window.scrollTo(0, 0);
-  }, []);
+  }, [navigate, toast]);
 
   useEffect(() => {
     localStorage.setItem('maintenanceMode', JSON.stringify(maintenanceMode));
@@ -59,26 +74,11 @@ const Admin = () => {
     localStorage.setItem('announcements', JSON.stringify(announcements));
   }, [announcements]);
 
-  const handleLogin = (username: string, password: string) => {
-    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-      localStorage.setItem('adminToken', 'rl-innviertel-admin-token');
-      setIsLoggedIn(true);
-      toast({
-        title: "Erfolgreich angemeldet",
-        description: "Willkommen im Admin-Bereich",
-      });
-    } else {
-      toast({
-        title: "Anmeldung fehlgeschlagen",
-        description: "Falsche Anmeldedaten",
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
+    localStorage.removeItem('discordUserId');
     setIsLoggedIn(false);
+    navigate('/');
     toast({
       title: "Abgemeldet",
       description: "Sie wurden erfolgreich abgemeldet",
@@ -140,8 +140,9 @@ const Admin = () => {
     });
   };
 
+  // If not logged in or unauthorized, don't show login screen - just redirect
   if (!isLoggedIn) {
-    return <AdminLogin onLogin={handleLogin} />;
+    return null; // Will redirect in useEffect
   }
 
   return (

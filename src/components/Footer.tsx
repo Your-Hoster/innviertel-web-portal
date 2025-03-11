@@ -1,15 +1,8 @@
+
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 const Footer = () => {
   const navigate = useNavigate();
-
-  const handleAdminLogin = () => {
-    // Store login info in localStorage to be picked up by the admin page
-    localStorage.setItem('adminAutoLogin', 'true');
-    navigate('/admin');
-  };
 
   return (
     <footer className="bg-innviertel-dark text-white">
@@ -96,15 +89,6 @@ const Footer = () => {
               Diese Website steht in keiner Verbindung zu Rockstar Games, Take-Two Interactive oder anderen Inhabern von Markenrechten.
             </span>
           </p>
-          
-          <Button 
-            onClick={handleAdminLogin} 
-            variant="ghost" 
-            className="mt-4 text-gray-400 hover:text-white text-sm flex items-center mx-auto"
-          >
-            <Shield className="h-4 w-4 mr-1" />
-            Administrationszugang
-          </Button>
         </div>
       </div>
     </footer>
