@@ -1,10 +1,8 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Shield, User, Lock } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useNavigate } from 'react-router-dom';
@@ -19,9 +17,9 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
   const navigate = useNavigate();
 
   // Redirect to home page since this page shouldn't be directly accessible anymore
-  useState(() => {
+  useEffect(() => {
     navigate('/');
-  });
+  }, [navigate]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +48,7 @@ const AdminLogin = ({ onLogin }: AdminLoginProps) => {
             </p>
           </CardContent>
           <CardFooter>
-            <Button onClick={() => navigate('/')} className="w-full">
+            <Button onClick={() => navigate('/')} className="w-full bg-innviertel-primary hover:bg-innviertel-secondary">
               Zurück zur Startseite
             </Button>
           </CardFooter>

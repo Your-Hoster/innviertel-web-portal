@@ -63,7 +63,7 @@ const Header = () => {
             )}
             <Button 
               asChild
-              className="bg-innviertel-accent hover:bg-innviertel-accent/90 text-white"
+              variant="accent"
             >
               <a href="https://connect.yourhoster.at">Jetzt spielen</a>
             </Button>
@@ -107,7 +107,8 @@ const Header = () => {
               )}
               <Button 
                 asChild
-                className="bg-innviertel-accent hover:bg-innviertel-accent/90 text-white w-full mt-2"
+                variant="accent"
+                className="w-full mt-2"
               >
                 <a href="https://connect.yourhoster.at/">Jetzt spielen</a>
               </Button>

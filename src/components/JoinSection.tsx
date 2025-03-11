@@ -66,7 +66,8 @@ const JoinSection = () => {
               <Button 
                 asChild
                 size="lg"
-                className="bg-white text-innviertel-primary hover:bg-white/90 button-transition"
+                variant="accent"
+                className="button-transition"
               >
                 <a href="https://connect.yourhoster.at">Jetzt spielen</a>
               </Button>
