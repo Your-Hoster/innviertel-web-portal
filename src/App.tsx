@@ -9,12 +9,14 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import CookieBanner from "@/components/CookieBanner";
 import Announcements from "@/components/Announcements";
+import { AuthProvider } from "@/components/AuthProvider";
 import Index from "./pages/Index";
 import Impressum from "./pages/Impressum";
 import Datenschutz from "./pages/Datenschutz";
 import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
 import AdminLogin from "./components/AdminLogin";
+import Login from "./pages/Login";
 import Maintenance from "./components/Maintenance";
 
 const queryClient = new QueryClient();
@@ -99,21 +101,24 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <CookieProvider>
-          <Toaster />
-          <Sonner />
-          <CookieBanner />
-          <BrowserRouter>
-            <Announcements />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/impressum" element={<Impressum />} />
-              <Route path="/datenschutz" element={<Datenschutz />} />
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin" element={<Admin />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+          <AuthProvider>
+            <Toaster />
+            <Sonner />
+            <CookieBanner />
+            <BrowserRouter>
+              <Announcements />
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/impressum" element={<Impressum />} />
+                <Route path="/datenschutz" element={<Datenschutz />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/admin" element={<Admin />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </AuthProvider>
         </CookieProvider>
       </TooltipProvider>
     </QueryClientProvider>
