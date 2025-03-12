@@ -12,15 +12,16 @@ import { Label } from '@/components/ui/label';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Shield, Bell, Settings, LogOut, AlertTriangle } from 'lucide-react';
+import { supabase } from "@/integrations/supabase/client";
 
 // Discord ID of the only allowed admin
 const ALLOWED_DISCORD_ID = "1108408817626124439";
 
 interface Announcement {
-  id: number;
+  id: string;
   title: string;
   content: string;
-  date: string;
+  created_at: string;
   active: boolean;
 }
 
@@ -30,6 +31,7 @@ const Admin = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [newAnnouncement, setNewAnnouncement] = useState({ title: '', content: '' });
   const [discordUserId, setDiscordUserId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -42,6 +44,10 @@ const Admin = () => {
     if (adminToken === 'rl-innviertel-admin-token' && storedDiscordUserId === ALLOWED_DISCORD_ID) {
       setIsLoggedIn(true);
       setDiscordUserId(storedDiscordUserId);
+      
+      // Fetch data from Supabase
+      fetchMaintenanceMode();
+      fetchAnnouncements();
     } else {
       // If not authorized, redirect to homepage
       navigate('/');
@@ -51,53 +57,93 @@ const Admin = () => {
         variant: "destructive",
       });
     }
-    
-    // Load maintenance mode status
-    const savedMaintenanceMode = localStorage.getItem('maintenanceMode');
-    if (savedMaintenanceMode) {
-      setMaintenanceMode(JSON.parse(savedMaintenanceMode));
-    }
-    
-    // Load announcements
-    const savedAnnouncements = localStorage.getItem('announcements');
-    if (savedAnnouncements) {
-      setAnnouncements(JSON.parse(savedAnnouncements));
-    }
 
     window.scrollTo(0, 0);
   }, [navigate, toast]);
 
-  // Update localStorage and trigger event for other tabs/windows
-  const updateMaintenanceMode = (newValue: boolean) => {
-    setMaintenanceMode(newValue);
-    localStorage.setItem('maintenanceMode', JSON.stringify(newValue));
-    
-    // Dispatch storage event to notify other tabs/windows
+  // Fetch maintenance mode from Supabase
+  const fetchMaintenanceMode = async () => {
     try {
-      window.dispatchEvent(new StorageEvent('storage', {
-        key: 'maintenanceMode',
-        newValue: JSON.stringify(newValue)
-      }));
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('value')
+        .eq('key', 'maintenanceMode')
+        .single();
+      
+      if (error) {
+        console.error('Error fetching maintenance mode:', error);
+        return;
+      }
+      
+      if (data) {
+        setMaintenanceMode(data.value === true || data.value === 'true');
+      }
     } catch (error) {
-      console.error('Error dispatching storage event:', error);
+      console.error('Error fetching maintenance mode:', error);
     }
-    
-    console.log("Maintenance mode updated:", newValue);
   };
-  
-  // Update announcements and trigger event for other tabs/windows
-  const updateAnnouncements = (newAnnouncements: Announcement[]) => {
-    setAnnouncements(newAnnouncements);
-    localStorage.setItem('announcements', JSON.stringify(newAnnouncements));
-    
-    // Dispatch storage event to notify other tabs/windows
+
+  // Fetch announcements from Supabase
+  const fetchAnnouncements = async () => {
     try {
-      window.dispatchEvent(new StorageEvent('storage', {
-        key: 'announcements',
-        newValue: JSON.stringify(newAnnouncements)
-      }));
+      const { data, error } = await supabase
+        .from('announcements')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching announcements:', error);
+        return;
+      }
+      
+      if (data) {
+        setAnnouncements(data);
+      }
     } catch (error) {
-      console.error('Error dispatching storage event:', error);
+      console.error('Error fetching announcements:', error);
+    }
+  };
+
+  // Update maintenance mode in Supabase
+  const updateMaintenanceMode = async (newValue: boolean) => {
+    setIsLoading(true);
+    
+    try {
+      const { error } = await supabase
+        .from('site_settings')
+        .update({ value: newValue })
+        .eq('key', 'maintenanceMode');
+      
+      if (error) {
+        console.error('Error updating maintenance mode:', error);
+        toast({
+          title: "Fehler",
+          description: "Die Einstellung konnte nicht gespeichert werden",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setMaintenanceMode(newValue);
+      
+      // Also update localStorage as a fallback
+      localStorage.setItem('maintenanceMode', JSON.stringify(newValue));
+      
+      toast({
+        title: newValue ? "Wartungsmodus aktiviert" : "Wartungsmodus deaktiviert",
+        description: newValue 
+          ? "Die Website zeigt jetzt den Wartungsmodus für Besucher an." 
+          : "Die Website ist jetzt für alle Besucher zugänglich.",
+      });
+    } catch (error) {
+      console.error('Error updating maintenance mode:', error);
+      toast({
+        title: "Fehler",
+        description: "Die Einstellung konnte nicht gespeichert werden",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -113,18 +159,10 @@ const Admin = () => {
   };
 
   const handleMaintenanceModeToggle = () => {
-    const newMode = !maintenanceMode;
-    updateMaintenanceMode(newMode);
-    
-    toast({
-      title: newMode ? "Wartungsmodus aktiviert" : "Wartungsmodus deaktiviert",
-      description: newMode 
-        ? "Die Website zeigt jetzt den Wartungsmodus für Besucher an." 
-        : "Die Website ist jetzt für alle Besucher zugänglich.",
-    });
+    updateMaintenanceMode(!maintenanceMode);
   };
 
-  const handleAddAnnouncement = () => {
+  const handleAddAnnouncement = async () => {
     if (newAnnouncement.title.trim() === '' || newAnnouncement.content.trim() === '') {
       toast({
         title: "Fehler",
@@ -134,40 +172,128 @@ const Admin = () => {
       return;
     }
 
-    const announcement: Announcement = {
-      id: Date.now(),
-      title: newAnnouncement.title,
-      content: newAnnouncement.content,
-      date: new Date().toISOString(),
-      active: true
-    };
-
-    const newAnnouncements = [announcement, ...announcements];
-    updateAnnouncements(newAnnouncements);
-    setNewAnnouncement({ title: '', content: '' });
+    setIsLoading(true);
     
-    toast({
-      title: "Ankündigung erstellt",
-      description: "Die Ankündigung wurde erfolgreich erstellt",
-    });
+    try {
+      const { data, error } = await supabase
+        .from('announcements')
+        .insert({
+          title: newAnnouncement.title,
+          content: newAnnouncement.content,
+          active: true
+        })
+        .select();
+      
+      if (error) {
+        console.error('Error adding announcement:', error);
+        toast({
+          title: "Fehler",
+          description: "Die Ankündigung konnte nicht erstellt werden",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (data) {
+        setAnnouncements([...data, ...announcements]);
+        setNewAnnouncement({ title: '', content: '' });
+        
+        toast({
+          title: "Ankündigung erstellt",
+          description: "Die Ankündigung wurde erfolgreich erstellt",
+        });
+      }
+    } catch (error) {
+      console.error('Error adding announcement:', error);
+      toast({
+        title: "Fehler",
+        description: "Die Ankündigung konnte nicht erstellt werden",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const toggleAnnouncementStatus = (id: number) => {
-    const updatedAnnouncements = announcements.map(announcement => 
-      announcement.id === id 
-        ? { ...announcement, active: !announcement.active } 
-        : announcement
-    );
-    updateAnnouncements(updatedAnnouncements);
+  const toggleAnnouncementStatus = async (id: string) => {
+    const announcement = announcements.find(a => a.id === id);
+    if (!announcement) return;
+    
+    setIsLoading(true);
+    
+    try {
+      const { error } = await supabase
+        .from('announcements')
+        .update({ active: !announcement.active })
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Error updating announcement:', error);
+        toast({
+          title: "Fehler",
+          description: "Der Status der Ankündigung konnte nicht geändert werden",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Update local state
+      setAnnouncements(announcements.map(a => 
+        a.id === id ? { ...a, active: !a.active } : a
+      ));
+      
+      toast({
+        title: "Status geändert",
+        description: `Ankündigung wurde ${!announcement.active ? 'aktiviert' : 'deaktiviert'}`,
+      });
+    } catch (error) {
+      console.error('Error updating announcement:', error);
+      toast({
+        title: "Fehler",
+        description: "Der Status der Ankündigung konnte nicht geändert werden",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const deleteAnnouncement = (id: number) => {
-    const filteredAnnouncements = announcements.filter(announcement => announcement.id !== id);
-    updateAnnouncements(filteredAnnouncements);
-    toast({
-      title: "Ankündigung gelöscht",
-      description: "Die Ankündigung wurde erfolgreich gelöscht",
-    });
+  const deleteAnnouncement = async (id: string) => {
+    setIsLoading(true);
+    
+    try {
+      const { error } = await supabase
+        .from('announcements')
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Error deleting announcement:', error);
+        toast({
+          title: "Fehler",
+          description: "Die Ankündigung konnte nicht gelöscht werden",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Update local state
+      setAnnouncements(announcements.filter(a => a.id !== id));
+      
+      toast({
+        title: "Ankündigung gelöscht",
+        description: "Die Ankündigung wurde erfolgreich gelöscht",
+      });
+    } catch (error) {
+      console.error('Error deleting announcement:', error);
+      toast({
+        title: "Fehler",
+        description: "Die Ankündigung konnte nicht gelöscht werden",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // If not logged in or unauthorized, don't show login screen - just redirect
@@ -231,8 +357,11 @@ const Admin = () => {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button onClick={handleAddAnnouncement}>
-                    Ankündigung erstellen
+                  <Button 
+                    onClick={handleAddAnnouncement}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Wird gespeichert..." : "Ankündigung erstellen"}
                   </Button>
                 </CardFooter>
               </Card>
@@ -259,11 +388,13 @@ const Admin = () => {
                               <Switch 
                                 checked={announcement.active}
                                 onCheckedChange={() => toggleAnnouncementStatus(announcement.id)}
+                                disabled={isLoading}
                               />
                               <Button 
                                 variant="destructive" 
                                 size="sm"
                                 onClick={() => deleteAnnouncement(announcement.id)}
+                                disabled={isLoading}
                               >
                                 Löschen
                               </Button>
@@ -273,7 +404,7 @@ const Admin = () => {
                             {announcement.content}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            {new Date(announcement.date).toLocaleDateString('de-DE')}
+                            {new Date(announcement.created_at).toLocaleDateString('de-DE')}
                           </p>
                           <div className="flex items-center mt-2">
                             <span className={`text-xs px-2 py-1 rounded ${announcement.active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
@@ -321,6 +452,7 @@ const Admin = () => {
                   <Switch 
                     checked={maintenanceMode}
                     onCheckedChange={handleMaintenanceModeToggle}
+                    disabled={isLoading}
                   />
                 </div>
               </CardContent>

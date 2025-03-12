@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CookieProvider } from "@/context/CookieContext";
 import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import CookieBanner from "@/components/CookieBanner";
 import Announcements from "@/components/Announcements";
 import Index from "./pages/Index";
@@ -23,26 +24,55 @@ const App = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if site is in maintenance mode
-    const checkMaintenanceMode = () => {
-      const savedMaintenanceMode = localStorage.getItem('maintenanceMode');
-      if (savedMaintenanceMode) {
-        setMaintenanceMode(JSON.parse(savedMaintenanceMode));
+    // Check if site is in maintenance mode from Supabase
+    const checkMaintenanceMode = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('site_settings')
+          .select('value')
+          .eq('key', 'maintenanceMode')
+          .single();
+        
+        if (error) {
+          console.error('Error fetching maintenance mode:', error);
+          // Fallback to localStorage if Supabase fails
+          const savedMaintenanceMode = localStorage.getItem('maintenanceMode');
+          if (savedMaintenanceMode) {
+            setMaintenanceMode(JSON.parse(savedMaintenanceMode));
+          }
+        } else if (data) {
+          // Parse the value from Supabase
+          const isMaintenanceMode = data.value === true || data.value === 'true';
+          setMaintenanceMode(isMaintenanceMode);
+        }
+      } catch (error) {
+        console.error('Error checking maintenance mode:', error);
       }
+      
       setLoading(false);
     };
 
     checkMaintenanceMode();
 
-    // Listen for storage events to update maintenance mode in real-time
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'maintenanceMode') {
-        checkMaintenanceMode();
-      }
-    };
+    // Set up real-time subscription for site settings
+    const channel = supabase
+      .channel('public:site_settings')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'site_settings',
+        filter: 'key=eq.maintenanceMode'
+      }, payload => {
+        if (payload.new) {
+          const isMaintenanceMode = payload.new.value === true || payload.new.value === 'true';
+          setMaintenanceMode(isMaintenanceMode);
+        }
+      })
+      .subscribe();
 
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   if (loading) {
