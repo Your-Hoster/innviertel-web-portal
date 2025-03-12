@@ -31,7 +31,7 @@ const App = () => {
           .from('site_settings')
           .select('value')
           .eq('key', 'maintenanceMode')
-          .single();
+          .maybeSingle();
         
         if (error) {
           console.error('Error fetching maintenance mode:', error);
@@ -40,8 +40,8 @@ const App = () => {
           if (savedMaintenanceMode) {
             setMaintenanceMode(JSON.parse(savedMaintenanceMode));
           }
-        } else if (data) {
-          // Parse the value from Supabase
+        } else if (data && data.value !== undefined) {
+          // Parse the value from Supabase, safe check for existence of value property
           const isMaintenanceMode = data.value === true || data.value === 'true';
           setMaintenanceMode(isMaintenanceMode);
         }
@@ -63,7 +63,7 @@ const App = () => {
         table: 'site_settings',
         filter: 'key=eq.maintenanceMode'
       }, payload => {
-        if (payload.new) {
+        if (payload.new && 'value' in payload.new) {
           const isMaintenanceMode = payload.new.value === true || payload.new.value === 'true';
           setMaintenanceMode(isMaintenanceMode);
         }
