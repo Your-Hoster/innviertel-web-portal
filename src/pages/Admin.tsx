@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
@@ -11,8 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { Shield, Bell, Settings, LogOut } from 'lucide-react';
-import AdminLogin from '@/components/AdminLogin';
+import { Shield, Bell, Settings, LogOut, AlertTriangle } from 'lucide-react';
 
 // Discord ID of the only allowed admin
 const ALLOWED_DISCORD_ID = "1108408817626124439";
@@ -53,11 +51,13 @@ const Admin = () => {
       });
     }
     
+    // Load maintenance mode status
     const savedMaintenanceMode = localStorage.getItem('maintenanceMode');
     if (savedMaintenanceMode) {
       setMaintenanceMode(JSON.parse(savedMaintenanceMode));
     }
     
+    // Load announcements
     const savedAnnouncements = localStorage.getItem('announcements');
     if (savedAnnouncements) {
       setAnnouncements(JSON.parse(savedAnnouncements));
@@ -66,10 +66,13 @@ const Admin = () => {
     window.scrollTo(0, 0);
   }, [navigate, toast]);
 
+  // Force maintenance mode update in localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('maintenanceMode', JSON.stringify(maintenanceMode));
+    console.log("Maintenance mode updated:", maintenanceMode);
   }, [maintenanceMode]);
 
+  // Update announcements in localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('announcements', JSON.stringify(announcements));
   }, [announcements]);
@@ -86,12 +89,17 @@ const Admin = () => {
   };
 
   const handleMaintenanceModeToggle = () => {
-    setMaintenanceMode(!maintenanceMode);
+    const newMode = !maintenanceMode;
+    setMaintenanceMode(newMode);
+    
+    // Force update localStorage immediately
+    localStorage.setItem('maintenanceMode', JSON.stringify(newMode));
+    
     toast({
-      title: maintenanceMode ? "Wartungsmodus deaktiviert" : "Wartungsmodus aktiviert",
-      description: maintenanceMode 
-        ? "Die Website ist jetzt für alle Besucher zugänglich." 
-        : "Die Website zeigt jetzt den Wartungsmodus für Besucher an.",
+      title: newMode ? "Wartungsmodus aktiviert" : "Wartungsmodus deaktiviert",
+      description: newMode 
+        ? "Die Website zeigt jetzt den Wartungsmodus für Besucher an." 
+        : "Die Website ist jetzt für alle Besucher zugänglich.",
     });
   };
 
@@ -158,7 +166,7 @@ const Admin = () => {
           </Button>
         </div>
         
-        <Tabs defaultValue="announcements" className="w-full">
+        <Tabs defaultValue="settings" className="w-full">
           <TabsList className="mb-6">
             <TabsTrigger value="announcements" className="flex items-center gap-2">
               <Bell size={16} />
@@ -268,6 +276,19 @@ const Admin = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                <div className="border border-yellow-300 bg-yellow-50 rounded-md p-4 mb-6">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium text-yellow-800">Wartungsmodus Information</h4>
+                      <p className="text-sm text-yellow-700">
+                        Der Wartungsmodus sperrt alle Seiten außer den Admin-Bereich.
+                        Nur Administratoren können auf die Website zugreifen, wenn dieser Modus aktiviert ist.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-medium">Wartungsmodus</h3>
@@ -281,6 +302,11 @@ const Admin = () => {
                   />
                 </div>
               </CardContent>
+              <CardFooter className="flex justify-end border-t pt-4">
+                <p className="text-xs text-muted-foreground">
+                  Aktuelle Einstellung: {maintenanceMode ? "Wartungsmodus aktiv" : "Website normal erreichbar"}
+                </p>
+              </CardFooter>
             </Card>
           </TabsContent>
         </Tabs>

@@ -1,10 +1,11 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield } from 'lucide-react';
+import { Shield, AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useNavigate } from 'react-router-dom';
@@ -14,20 +15,28 @@ const AdminLogin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Check if already logged in
+    const adminToken = localStorage.getItem('adminToken');
+    const discordUserId = localStorage.getItem('discordUserId');
+    
+    if (adminToken === 'rl-innviertel-admin-token' && discordUserId === '1108408817626124439') {
+      navigate('/admin');
+    }
+  }, [navigate]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
     
     // Simple validation
     if (!username || !password) {
-      toast({
-        title: "Fehler",
-        description: "Bitte geben Sie Benutzername und Passwort ein",
-        variant: "destructive",
-      });
+      setError('Bitte geben Sie Benutzername und Passwort ein');
       setIsLoading(false);
       return;
     }
@@ -45,6 +54,7 @@ const AdminLogin = () => {
       
       navigate('/admin');
     } else {
+      setError('Ungültiger Benutzername oder Passwort');
       toast({
         title: "Anmeldung fehlgeschlagen",
         description: "Ungültiger Benutzername oder Passwort",
@@ -72,6 +82,13 @@ const AdminLogin = () => {
           </CardHeader>
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
+              {error && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              
               <div className="space-y-2">
                 <Label htmlFor="username">Benutzername</Label>
                 <Input 
@@ -80,6 +97,7 @@ const AdminLogin = () => {
                   placeholder="Benutzername eingeben" 
                   value={username} 
                   onChange={(e) => setUsername(e.target.value)} 
+                  autoComplete="off"
                 />
               </div>
               <div className="space-y-2">
@@ -90,6 +108,7 @@ const AdminLogin = () => {
                   placeholder="Passwort eingeben" 
                   value={password} 
                   onChange={(e) => setPassword(e.target.value)} 
+                  autoComplete="off"
                 />
               </div>
             </CardContent>

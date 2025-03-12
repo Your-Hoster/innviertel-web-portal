@@ -34,12 +34,19 @@ const App = () => {
     return null; // Return nothing during initial load to prevent flicker
   }
 
-  // Check if current path is admin
-  const isAdminPath = window.location.pathname.startsWith('/admin');
-
-  // Show maintenance page for all routes except admin
-  if (maintenanceMode && !isAdminPath) {
-    return <Maintenance />;
+  // Show maintenance page for all routes except admin routes
+  if (maintenanceMode && !window.location.pathname.includes('/admin')) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <CookieProvider>
+            <Toaster />
+            <Sonner />
+            <Maintenance />
+          </CookieProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
   }
 
   return (
