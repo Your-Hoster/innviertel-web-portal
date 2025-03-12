@@ -23,11 +23,25 @@ const App = () => {
 
   useEffect(() => {
     // Check if site is in maintenance mode
-    const savedMaintenanceMode = localStorage.getItem('maintenanceMode');
-    if (savedMaintenanceMode) {
-      setMaintenanceMode(JSON.parse(savedMaintenanceMode));
-    }
-    setLoading(false);
+    const checkMaintenanceMode = () => {
+      const savedMaintenanceMode = localStorage.getItem('maintenanceMode');
+      if (savedMaintenanceMode) {
+        setMaintenanceMode(JSON.parse(savedMaintenanceMode));
+      }
+      setLoading(false);
+    };
+
+    checkMaintenanceMode();
+
+    // Listen for storage events to update maintenance mode in real-time
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'maintenanceMode') {
+        checkMaintenanceMode();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   if (loading) {
@@ -35,7 +49,8 @@ const App = () => {
   }
 
   // Show maintenance page for all routes except admin routes
-  if (maintenanceMode && !window.location.pathname.includes('/admin')) {
+  if (maintenanceMode && 
+      !window.location.pathname.startsWith('/admin')) {
     return (
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>

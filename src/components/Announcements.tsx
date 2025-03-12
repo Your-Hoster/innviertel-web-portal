@@ -16,18 +16,32 @@ const Announcements = () => {
   const [dismissedAnnouncements, setDismissedAnnouncements] = useState<number[]>([]);
 
   useEffect(() => {
-    // Load announcements from localStorage
-    const savedAnnouncements = localStorage.getItem('announcements');
-    if (savedAnnouncements) {
-      const parsedAnnouncements = JSON.parse(savedAnnouncements);
-      setAnnouncements(parsedAnnouncements.filter((a: Announcement) => a.active));
-    }
+    // Load announcements from localStorage and listen for changes
+    const loadAnnouncements = () => {
+      const savedAnnouncements = localStorage.getItem('announcements');
+      if (savedAnnouncements) {
+        const parsedAnnouncements = JSON.parse(savedAnnouncements);
+        setAnnouncements(parsedAnnouncements.filter((a: Announcement) => a.active));
+      }
+    };
 
     // Load dismissed announcements from localStorage
     const savedDismissed = localStorage.getItem('dismissedAnnouncements');
     if (savedDismissed) {
       setDismissedAnnouncements(JSON.parse(savedDismissed));
     }
+
+    loadAnnouncements();
+
+    // Listen for storage events to update announcements in real-time
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'announcements') {
+        loadAnnouncements();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   // Save dismissed announcements to localStorage
