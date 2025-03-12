@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { CookieProvider } from "@/context/CookieContext";
 import { useEffect, useState } from "react";
 import CookieBanner from "@/components/CookieBanner";
+import Announcements from "@/components/Announcements";
 import Index from "./pages/Index";
 import Impressum from "./pages/Impressum";
 import Datenschutz from "./pages/Datenschutz";
@@ -72,6 +73,7 @@ const App = () => {
           <Sonner />
           <CookieBanner />
           <BrowserRouter>
+            <Announcements />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/impressum" element={<Impressum />} />

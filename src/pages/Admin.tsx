@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
@@ -66,16 +67,39 @@ const Admin = () => {
     window.scrollTo(0, 0);
   }, [navigate, toast]);
 
-  // Force maintenance mode update in localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('maintenanceMode', JSON.stringify(maintenanceMode));
-    console.log("Maintenance mode updated:", maintenanceMode);
-  }, [maintenanceMode]);
-
-  // Update announcements in localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem('announcements', JSON.stringify(announcements));
-  }, [announcements]);
+  // Update localStorage and trigger event for other tabs/windows
+  const updateMaintenanceMode = (newValue: boolean) => {
+    setMaintenanceMode(newValue);
+    localStorage.setItem('maintenanceMode', JSON.stringify(newValue));
+    
+    // Dispatch storage event to notify other tabs/windows
+    try {
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'maintenanceMode',
+        newValue: JSON.stringify(newValue)
+      }));
+    } catch (error) {
+      console.error('Error dispatching storage event:', error);
+    }
+    
+    console.log("Maintenance mode updated:", newValue);
+  };
+  
+  // Update announcements and trigger event for other tabs/windows
+  const updateAnnouncements = (newAnnouncements: Announcement[]) => {
+    setAnnouncements(newAnnouncements);
+    localStorage.setItem('announcements', JSON.stringify(newAnnouncements));
+    
+    // Dispatch storage event to notify other tabs/windows
+    try {
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'announcements',
+        newValue: JSON.stringify(newAnnouncements)
+      }));
+    } catch (error) {
+      console.error('Error dispatching storage event:', error);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
@@ -90,10 +114,7 @@ const Admin = () => {
 
   const handleMaintenanceModeToggle = () => {
     const newMode = !maintenanceMode;
-    setMaintenanceMode(newMode);
-    
-    // Force update localStorage immediately
-    localStorage.setItem('maintenanceMode', JSON.stringify(newMode));
+    updateMaintenanceMode(newMode);
     
     toast({
       title: newMode ? "Wartungsmodus aktiviert" : "Wartungsmodus deaktiviert",
@@ -121,7 +142,8 @@ const Admin = () => {
       active: true
     };
 
-    setAnnouncements([announcement, ...announcements]);
+    const newAnnouncements = [announcement, ...announcements];
+    updateAnnouncements(newAnnouncements);
     setNewAnnouncement({ title: '', content: '' });
     
     toast({
@@ -131,17 +153,17 @@ const Admin = () => {
   };
 
   const toggleAnnouncementStatus = (id: number) => {
-    setAnnouncements(
-      announcements.map(announcement => 
-        announcement.id === id 
-          ? { ...announcement, active: !announcement.active } 
-          : announcement
-      )
+    const updatedAnnouncements = announcements.map(announcement => 
+      announcement.id === id 
+        ? { ...announcement, active: !announcement.active } 
+        : announcement
     );
+    updateAnnouncements(updatedAnnouncements);
   };
 
   const deleteAnnouncement = (id: number) => {
-    setAnnouncements(announcements.filter(announcement => announcement.id !== id));
+    const filteredAnnouncements = announcements.filter(announcement => announcement.id !== id);
+    updateAnnouncements(filteredAnnouncements);
     toast({
       title: "Ankündigung gelöscht",
       description: "Die Ankündigung wurde erfolgreich gelöscht",
